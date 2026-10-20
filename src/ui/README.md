@@ -12,7 +12,7 @@ This service provides the frontend for the retail store, serving the HTML UI and
 
 The following environment variables are available for configuring the service:
 
-| Name                              | Description                                                                                            | Default                 |
+| Nameeee                              | Description                                                                                            | Default                 |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------- |
 | `PORT`                            | The port which the server will listen on                                                               | `8080`                  |
 | `RETAIL_UI_THEME`                 | Name of the theme for the UI, valid values are `default`, `green`, `orange`                            | `"default"`             |
