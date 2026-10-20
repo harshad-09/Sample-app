@@ -4,6 +4,112 @@
   th:replace="~{fragments/bare :: bare (~{::body})}"
 >
   <body>
+    <style>
+      /* ---------- Custom enhancements ---------- */
+      html {
+        scroll-behavior: smooth;
+      }
+      .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition:
+          opacity 0.7s ease,
+          transform 0.7s ease;
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .delay-1 {
+        transition-delay: 0.1s;
+      }
+      .delay-2 {
+        transition-delay: 0.2s;
+      }
+      .delay-3 {
+        transition-delay: 0.3s;
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-12px);
+        }
+      }
+      .float-slow {
+        animation: float 6s ease-in-out infinite;
+      }
+      .float-slower {
+        animation: float 8s ease-in-out infinite;
+      }
+      @keyframes bounce-down {
+        0%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.6;
+        }
+        50% {
+          transform: translateY(8px);
+          opacity: 1;
+        }
+      }
+      .scroll-hint {
+        animation: bounce-down 1.8s ease-in-out infinite;
+      }
+      .gradient-text {
+        background: linear-gradient(90deg, #a5b4fc, #f0abfc, #fcd34d);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-size: 200% auto;
+        animation: shine 5s linear infinite;
+      }
+      @keyframes shine {
+        to {
+          background-position: 200% center;
+        }
+      }
+      .glass {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+      }
+      .feature-card {
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+      .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.18);
+      }
+      .icon-ring {
+        transition:
+          transform 0.4s ease,
+          background-color 0.3s ease;
+      }
+      .feature-card:hover .icon-ring {
+        transform: rotate(-8deg) scale(1.1);
+      }
+      .section-title::after {
+        content: "";
+        display: block;
+        width: 56px;
+        height: 4px;
+        margin: 12px auto 0;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #6366f1, #d946ef);
+      }
+      #back-to-top {
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+      }
+    </style>
+
     <nav
       class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       id="navbar"
@@ -37,7 +143,7 @@
             <div class="flex items-center">
               <a th:href="@{/cart}" id="go-cart">
                 <button
-                  class="flex items-center gap-2 p-2 text-white hover:text-white/80"
+                  class="flex items-center gap-2 p-2 text-white hover:text-white/80 transition-transform hover:scale-110"
                 >
                   <i class="fas fa-shopping-cart text-lg switch"></i>
                   <span
@@ -69,6 +175,7 @@
                 "backdrop-blur-md",
                 "border-b",
                 "border-white/10",
+                "shadow-sm",
               );
             // Change text color on scroll
             navbar
@@ -92,6 +199,7 @@
                 "backdrop-blur-md",
                 "border-b",
                 "border-white/10",
+                "shadow-sm",
               );
             // Restore text color
             navbar
@@ -111,16 +219,19 @@
 
     <!-- Hero Section -->
     <section
-      class="relative flex items-center justify-center overflow-hidden h-[500px]"
+      class="relative flex items-center justify-center overflow-hidden h-[560px]"
     >
       <!-- Background Image with Overlay -->
       <div class="absolute inset-0">
         <img
           th:src="@{/assets/img/hero.jpg}"
           alt="Hero Background"
-          class="w-full h-full object-cover"
+          class="w-full h-full object-cover scale-105"
         />
         <div class="absolute inset-0 bg-black/70"></div>
+        <div
+          class="absolute inset-0 bg-gradient-to-br from-indigo-900/40 via-transparent to-fuchsia-900/30"
+        ></div>
         <div class="absolute inset-0">
           <svg width="100%" height="100%">
             <defs>
@@ -146,21 +257,35 @@
         ></div>
       </div>
 
+      <!-- Floating decorative orbs -->
+      <div
+        class="absolute top-24 left-10 w-40 h-40 rounded-full bg-indigo-500/30 blur-3xl float-slow"
+      ></div>
+      <div
+        class="absolute bottom-24 right-10 w-52 h-52 rounded-full bg-fuchsia-500/25 blur-3xl float-slower"
+      ></div>
+
       <!-- Content -->
-      <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="text-4xl sm:text-5xl font-bold text-white mb-6">
-          The most public <span class="text-primary-400">Secret Shop</span>
-        </h1>
-        <p
-          class="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto text-gray-300"
+      <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <span
+          class="glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium text-white/90 mb-6"
         >
+          <i class="fas fa-user-secret text-amber-300"></i>
+          Trusted by agents in 40+ countries
+        </span>
+        <h1
+          class="text-4xl sm:text-6xl font-extrabold text-white mb-6 leading-tight tracking-tight"
+        >
+          The most public <span class="gradient-text">Secret Shop</span>
+        </h1>
+        <p class="text-xl md:text-2xl mb-8 max-w-2xl text-gray-300">
           Everything a secret agent needs, minus the paperwork by harsh
         </p>
-        <div class="flex gap-4">
+        <div class="flex flex-wrap gap-4">
           <a
             id="shop-now"
             th:href="@{/catalog}"
-            class="relative inline-flex items-center gap-2 px-6 py-3 text-lg font-semibold text-white bg-primary-500 rounded-md hover:bg-primary-700 transition-colors overflow-hidden border border-gray-400"
+            class="relative inline-flex items-center gap-2 px-6 py-3 text-lg font-semibold text-white bg-primary-500 rounded-md hover:bg-primary-700 hover:-translate-y-0.5 hover:shadow-xl transition-all overflow-hidden border border-gray-400"
           >
             <span class="relative z-10" th:text="#{hero.shopnow}">Explore</span>
             <i class="fas fa-arrow-right relative z-10"></i>
@@ -168,6 +293,64 @@
               class="absolute inset-0 h-full w-[200%] animate-beam bg-gradient-to-r from-transparent via-white/20 to-transparent"
             ></div>
           </a>
+          <a
+            href="#why-us"
+            class="glass inline-flex items-center gap-2 px-6 py-3 text-lg font-semibold text-white rounded-md hover:bg-white/20 transition-colors"
+          >
+            <i class="fas fa-play-circle"></i>
+            Learn more
+          </a>
+        </div>
+      </div>
+
+      <!-- Scroll hint -->
+      <a
+        href="#stats"
+        class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 text-gray-500 scroll-hint"
+        aria-label="Scroll down"
+      >
+        <i class="fas fa-chevron-down text-xl"></i>
+      </a>
+    </section>
+
+    <!-- Stats strip -->
+    <section id="stats" class="relative z-10 -mt-10">
+      <div class="max-w-4xl mx-auto px-4">
+        <div
+          class="reveal grid grid-cols-2 md:grid-cols-4 gap-6 bg-white rounded-2xl shadow-xl border border-gray-100 p-6"
+        >
+          <div class="text-center">
+            <div class="text-3xl font-extrabold text-primary-500">
+              <span data-count="12000">0</span>+
+            </div>
+            <div class="text-xs uppercase tracking-wider text-gray-500 mt-1">
+              Happy Agents
+            </div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-extrabold text-primary-500">
+              <span data-count="350">0</span>+
+            </div>
+            <div class="text-xs uppercase tracking-wider text-gray-500 mt-1">
+              Secret Gadgets
+            </div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-extrabold text-primary-500">
+              <span data-count="40">0</span>
+            </div>
+            <div class="text-xs uppercase tracking-wider text-gray-500 mt-1">
+              Countries Served
+            </div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-extrabold text-primary-500">
+              <span data-count="99">0</span>%
+            </div>
+            <div class="text-xs uppercase tracking-wider text-gray-500 mt-1">
+              Mission Success
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -176,9 +359,9 @@
     <main class="flex-grow">
       <!-- Content goes here -->
       <!-- Popular products -->
-      <section class="max-w-4xl mx-auto px-4 py-8">
+      <section class="max-w-4xl mx-auto px-4 py-12">
         <div
-          class="flex justify-between items-center mb-8 border-b border-gray-200 pb-4"
+          class="reveal flex justify-between items-center mb-8 border-b border-gray-200 pb-4"
         >
           <h2
             class="text-2xl font-bold text-gray-700"
@@ -206,22 +389,35 @@
           <!-- Product Card -->
           <div
             th:each="item : ${catalog.products}"
-            class="border-b md:border-0 border-gray-300"
+            class="reveal border-b md:border-0 border-gray-300 transition-transform duration-300 hover:-translate-y-2"
           >
             <div th:replace="~{fragments/product_card :: card(${item}) }"></div>
           </div>
         </div>
       </section>
 
-      <section class="bg-white py-16">
+      <!-- Why choose us -->
+      <section
+        id="why-us"
+        class="py-20 bg-gradient-to-b from-white via-gray-50 to-white"
+      >
         <div class="max-w-4xl mx-auto px-4">
-          <h2 class="text-2xl font-bold text-center text-gray-700 mb-4">
+          <h2
+            class="reveal section-title text-3xl font-bold text-center text-gray-700 mb-3"
+          >
             Why Choose Us
           </h2>
+          <p class="reveal text-center text-gray-500 mb-12 max-w-xl mx-auto">
+            Three promises we keep, even when the mission goes sideways.
+          </p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="text-center p-6">
-              <div class="text-primary-500 mb-4">
-                <i class="fas fa-shipping-fast text-4xl"></i>
+            <div
+              class="reveal delay-1 feature-card text-center p-8 bg-white rounded-2xl border border-gray-100 shadow-md"
+            >
+              <div
+                class="icon-ring mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white shadow-lg"
+              >
+                <i class="fas fa-shipping-fast text-2xl"></i>
               </div>
               <h3 class="text-xl font-semibold text-gray-800 mb-2">
                 Covert Shipping
@@ -232,9 +428,13 @@
               </p>
             </div>
 
-            <div class="text-center p-6">
-              <div class="text-primary-500 mb-4">
-                <i class="fas fa-medal text-4xl"></i>
+            <div
+              class="reveal delay-2 feature-card text-center p-8 bg-white rounded-2xl border border-gray-100 shadow-md"
+            >
+              <div
+                class="icon-ring mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-rose-500 text-white shadow-lg"
+              >
+                <i class="fas fa-medal text-2xl"></i>
               </div>
               <h3 class="text-xl font-semibold text-gray-800 mb-2">
                 Mission Guarantee
@@ -244,9 +444,13 @@
               </p>
             </div>
 
-            <div class="text-center p-6">
-              <div class="text-primary-500 mb-4">
-                <i class="fas fa-headset text-4xl"></i>
+            <div
+              class="reveal delay-3 feature-card text-center p-8 bg-white rounded-2xl border border-gray-100 shadow-md"
+            >
+              <div
+                class="icon-ring mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-500 text-white shadow-lg"
+              >
+                <i class="fas fa-headset text-2xl"></i>
               </div>
               <h3 class="text-xl font-semibold text-gray-800 mb-2">Support</h3>
               <p class="text-gray-600">
@@ -257,6 +461,312 @@
           </div>
         </div>
       </section>
+
+      <!-- How it works -->
+      <section class="py-16">
+        <div class="max-w-4xl mx-auto px-4">
+          <h2
+            class="reveal section-title text-3xl font-bold text-center text-gray-700 mb-12"
+          >
+            How It Works
+          </h2>
+          <div class="relative grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div
+              class="hidden md:block absolute top-8 left-[16%] right-[16%] border-t-2 border-dashed border-gray-300"
+            ></div>
+            <div class="reveal delay-1 relative text-center">
+              <div
+                class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-500 text-white text-xl font-bold ring-8 ring-white shadow-lg"
+              >
+                1
+              </div>
+              <h3 class="font-semibold text-gray-800 mb-1">Pick Your Gear</h3>
+              <p class="text-sm text-gray-500">
+                Browse the catalog and choose what your mission demands.
+              </p>
+            </div>
+            <div class="reveal delay-2 relative text-center">
+              <div
+                class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-500 text-white text-xl font-bold ring-8 ring-white shadow-lg"
+              >
+                2
+              </div>
+              <h3 class="font-semibold text-gray-800 mb-1">Secure Checkout</h3>
+              <p class="text-sm text-gray-500">
+                Pay through an encrypted channel. No names, no traces.
+              </p>
+            </div>
+            <div class="reveal delay-3 relative text-center">
+              <div
+                class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-500 text-white text-xl font-bold ring-8 ring-white shadow-lg"
+              >
+                3
+              </div>
+              <h3 class="font-semibold text-gray-800 mb-1">Receive Quietly</h3>
+              <p class="text-sm text-gray-500">
+                Your package arrives disguised and right on schedule.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Testimonials -->
+      <section class="py-20 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4">
+          <h2
+            class="reveal section-title text-3xl font-bold text-center text-gray-700 mb-12"
+          >
+            What Agents Say
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <figure
+              class="reveal delay-1 feature-card relative bg-white rounded-2xl p-8 shadow-md border border-gray-100"
+            >
+              <i
+                class="fas fa-quote-left absolute top-6 right-6 text-3xl text-primary-500/20"
+              ></i>
+              <div class="text-amber-400 mb-3">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i
+                ><i class="fas fa-star"></i><i class="fas fa-star"></i
+                ><i class="fas fa-star"></i>
+              </div>
+              <blockquote class="text-gray-600 mb-5">
+                The invisible ink pen saved my entire operation. Arrived in a
+                box labelled "houseplant fertilizer". Genius.
+              </blockquote>
+              <figcaption class="flex items-center gap-3">
+                <div
+                  class="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-white font-semibold"
+                >
+                  A7
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-gray-800">
+                    Agent A7
+                  </div>
+                  <div class="text-xs text-gray-400">Field Operative</div>
+                </div>
+              </figcaption>
+            </figure>
+
+            <figure
+              class="reveal delay-2 feature-card relative bg-white rounded-2xl p-8 shadow-md border border-gray-100"
+            >
+              <i
+                class="fas fa-quote-left absolute top-6 right-6 text-3xl text-primary-500/20"
+              ></i>
+              <div class="text-amber-400 mb-3">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i
+                ><i class="fas fa-star"></i><i class="fas fa-star"></i
+                ><i class="fas fa-star"></i>
+              </div>
+              <blockquote class="text-gray-600 mb-5">
+                Support responded in seconds on a secure channel. Replacement
+                gadget showed up before the old one even self-destructed.
+              </blockquote>
+              <figcaption class="flex items-center gap-3">
+                <div
+                  class="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-rose-500 flex items-center justify-center text-white font-semibold"
+                >
+                  K9
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-gray-800">
+                    Agent K9
+                  </div>
+                  <div class="text-xs text-gray-400">Deep Cover Specialist</div>
+                </div>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- Call to action -->
+      <section class="py-20">
+        <div class="max-w-4xl mx-auto px-4">
+          <div
+            class="reveal relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-indigo-900 to-fuchsia-900 px-8 py-14 text-center shadow-2xl"
+          >
+            <div
+              class="absolute -top-16 -left-16 h-56 w-56 rounded-full bg-indigo-500/30 blur-3xl"
+            ></div>
+            <div
+              class="absolute -bottom-16 -right-16 h-56 w-56 rounded-full bg-fuchsia-500/30 blur-3xl"
+            ></div>
+            <div class="relative">
+              <h2 class="text-3xl font-bold text-white mb-3">
+                Ready for your next mission?
+              </h2>
+              <p class="text-gray-300 mb-8 max-w-lg mx-auto">
+                Get gear updates and secret offers delivered straight to your
+                encrypted inbox.
+              </p>
+              <div
+                class="mx-auto flex max-w-md flex-col gap-3 sm:flex-row"
+              >
+                <input
+                  type="email"
+                  placeholder="agent@safehouse.com"
+                  aria-label="Email address"
+                  class="flex-1 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-gray-400 outline-none focus:border-white/60 focus:bg-white/20 transition"
+                />
+                <button
+                  type="button"
+                  class="rounded-md bg-white px-6 py-3 font-semibold text-gray-800 hover:bg-gray-100 hover:-translate-y-0.5 transition-all"
+                >
+                  Subscribe
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400">
+      <div class="max-w-4xl mx-auto px-4 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <div class="flex items-center text-white mb-3">
+              <i class="fas fa-briefcase text-xl"></i>
+              <span class="ml-2 font-semibold">Secret Shop</span>
+            </div>
+            <p class="text-sm">
+              Everything a secret agent needs, minus the paperwork.
+            </p>
+          </div>
+          <div>
+            <h4 class="text-white font-semibold mb-3">Quick Links</h4>
+            <ul class="space-y-2 text-sm">
+              <li>
+                <a th:href="@{/}" class="hover:text-white transition">Home</a>
+              </li>
+              <li>
+                <a th:href="@{/catalog}" class="hover:text-white transition"
+                  >Catalog</a
+                >
+              </li>
+              <li>
+                <a th:href="@{/cart}" class="hover:text-white transition"
+                  >Cart</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-white font-semibold mb-3">Stay Connected</h4>
+            <div class="flex gap-3">
+              <a
+                href="#"
+                aria-label="Twitter"
+                class="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-primary-500 hover:text-white transition"
+                ><i class="fab fa-twitter"></i
+              ></a>
+              <a
+                href="#"
+                aria-label="GitHub"
+                class="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-primary-500 hover:text-white transition"
+                ><i class="fab fa-github"></i
+              ></a>
+              <a
+                href="#"
+                aria-label="Instagram"
+                class="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-primary-500 hover:text-white transition"
+                ><i class="fab fa-instagram"></i
+              ></a>
+            </div>
+          </div>
+        </div>
+        <div
+          class="mt-10 border-t border-white/10 pt-6 text-center text-xs text-gray-500"
+        >
+          &copy; 2026 Secret Shop. All rights reserved. This message will not
+          self-destruct.
+        </div>
+      </div>
+    </footer>
+
+    <!-- Back to top -->
+    <button
+      id="back-to-top"
+      type="button"
+      aria-label="Back to top"
+      class="fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-primary-500 text-white shadow-lg opacity-0 pointer-events-none translate-y-3 hover:bg-primary-700"
+    >
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+      // Reveal-on-scroll animation
+      (function () {
+        const items = document.querySelectorAll(".reveal");
+        if (!("IntersectionObserver" in window)) {
+          items.forEach((el) => el.classList.add("visible"));
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("visible");
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.15 },
+        );
+        items.forEach((el) => io.observe(el));
+      })();
+
+      // Animated counters
+      (function () {
+        const counters = document.querySelectorAll("[data-count]");
+        const animate = (el) => {
+          const target = parseInt(el.getAttribute("data-count"), 10);
+          const duration = 1600;
+          const start = performance.now();
+          const tick = (now) => {
+            const p = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = Math.floor(eased * target).toLocaleString();
+            if (p < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        };
+        if (!("IntersectionObserver" in window)) {
+          counters.forEach(animate);
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                animate(entry.target);
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.6 },
+        );
+        counters.forEach((el) => io.observe(el));
+      })();
+
+      // Back-to-top button
+      (function () {
+        const btn = document.getElementById("back-to-top");
+        window.addEventListener("scroll", () => {
+          const show = window.scrollY > 500;
+          btn.style.opacity = show ? "1" : "0";
+          btn.style.pointerEvents = show ? "auto" : "none";
+          btn.style.transform = show ? "translateY(0)" : "translateY(12px)";
+        });
+        btn.addEventListener("click", () =>
+          window.scrollTo({ top: 0, behavior: "smooth" }),
+        );
+      })();
+    </script>
   </body>
 </html>
