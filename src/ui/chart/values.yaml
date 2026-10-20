@@ -4,9 +4,9 @@
 
 replicaCount: 1
 image:
-  repository: 234308273187.dkr.ecr.ap-south-1.amazonaws.com/demo-project
+  repository: 234308273187.dkr.ecr.ap-south-1.amazonaws.com/demo-project-ui
   pullPolicy: Always
-  tag: "latest"
+  tag: "c28ee55"
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
