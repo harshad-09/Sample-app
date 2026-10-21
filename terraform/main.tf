@@ -77,9 +77,9 @@ module "retail_app_eks" {
       instance_types = ["t3.small"]
       capacity_type  = "ON_DEMAND"
 
-      min_size     = 2
-      max_size     = 4
-      desired_size = 3
+      min_size     = 3
+      max_size     = 6
+      desired_size = 5
 
       disk_size = 30
     }
