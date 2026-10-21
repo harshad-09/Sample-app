@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - "src/**"
-      - "!src/*/chart/**"
   workflow_dispatch:
 
 env:

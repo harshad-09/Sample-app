@@ -19,6 +19,9 @@ COPY .mvn .mvn
 COPY mvnw .
 COPY pom.xml .
 
+# Fix for CI/Windows: remove Windows line endings (CRLF) and make the wrapper executable
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw
+
 RUN ./mvnw dependency:go-offline -B -q
 
 COPY ./src ./src
