@@ -6,7 +6,7 @@ replicaCount: 1
 image:
   repository: 234308273187.dkr.ecr.ap-south-1.amazonaws.com/demo-project-ui
   pullPolicy: Always
-  tag: "7db6a6d"
+  tag: "e924a60"
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
