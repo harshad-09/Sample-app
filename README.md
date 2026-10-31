@@ -1,168 +1,153 @@
-# Secret Shop: a retail store on AWS EKS with GitOps
+# shop
 
-A microservices retail store running on Amazon EKS with a fully automated delivery pipeline.
-Terraform builds the infrastructure, GitHub Actions builds and publishes the images, Argo CD
-deploys them to the cluster, and Prometheus and Grafana monitor everything.
-A commit to `main` goes live with no manual steps.
+A cloud-native retail store on AWS EKS with a fully automated delivery pipeline.
+Push to `main` and it is built, published, deployed and monitored automatically.
 
-![Secret Shop live on AWS](docs/app.png)
+![shop live on AWS](docs/app-live.png)
 
-## What this project demonstrates
+## Overview
 
-- Infrastructure as code with Terraform (VPC and EKS modules, managed node group, add-ons)
-- Continuous integration with GitHub Actions (detects changed services, builds only those)
-- A private container registry on Amazon ECR
-- GitOps continuous delivery with Argo CD and Helm charts
-- Ingress with ingress-nginx and an AWS load balancer
-- Monitoring with Prometheus and Grafana, including a custom dashboard
-- A redesigned UI home page (Thymeleaf template) deployed through the pipeline
+shop is a microservices retail store made of five services: **ui**, **catalog**, **cart**,
+**checkout** and **orders**. The project focuses on the platform around the application:
+
+- **Infrastructure as code.** Terraform builds the VPC, the EKS cluster and the add-ons.
+- **Continuous integration.** GitHub Actions builds only the services that changed.
+- **Private registry.** Images are stored in Amazon ECR, one repository per service.
+- **GitOps delivery.** Argo CD keeps the cluster in sync with the Git repository.
+- **Observability.** Prometheus and Grafana show cluster and app health.
 
 ## Architecture
 
 ![Architecture](docs/architecture.png)
 
-```mermaid
-flowchart LR
-    Dev[Developer] -- git push --> GH[GitHub repo]
-    GH --> GA[GitHub Actions]
-    GA -- build and push image --> ECR[(Amazon ECR)]
-    GA -- commit new image tag --> GH
-    GH -- watched by --> Argo[Argo CD in EKS]
-    Argo -- sync Helm charts --> EKS[Amazon EKS]
-    ECR -- image pull --> EKS
-    EKS --> Ing[ingress-nginx]
-    Ing --> LB[AWS Load Balancer]
-    LB --> User[Browser]
-    EKS -. metrics .-> Prom[Prometheus] --> Graf[Grafana]
-```
+1. A developer pushes code to GitHub.
+2. GitHub Actions builds the image and pushes it to Amazon ECR.
+3. The workflow commits the new image tag to the Helm chart.
+4. Argo CD detects the commit and syncs the chart to Amazon EKS.
+5. Users reach the shop through ingress-nginx and a load balancer.
 
 ## Tech stack
 
-| Layer | Tooling |
+| Area | Tools |
 |---|---|
-| Infrastructure as code | Terraform (`terraform-aws-modules` for VPC and EKS) |
-| Cluster | Amazon EKS with a managed node group, region `ap-south-1` |
-| Networking | VPC with public and private subnets, NAT gateway, ingress-nginx |
-| Registry | Amazon ECR, one repository per service (`demo-project-<service>`) |
-| CI | GitHub Actions |
-| CD | Argo CD with Helm charts |
-| Monitoring | Prometheus and Grafana (`kube-prometheus-stack`) |
-| Application | Retail store microservices: ui, catalog, cart, checkout, orders |
+| Cloud | AWS (VPC, EKS, ECR, Load Balancer), region `ap-south-1` |
+| Infrastructure as code | Terraform with `terraform-aws-modules` for VPC and EKS |
+| CI / CD | GitHub Actions, Argo CD |
+| Ingress | ingress-nginx, cert-manager |
+| Monitoring | Prometheus, Grafana (`kube-prometheus-stack`) |
 
-## Repository layout
+## Repository structure
 
 ```
 .github/workflows/
-  deploy.yml              CI pipeline: build, push to ECR, update the Helm image tag
+  deploy.yml            CI pipeline
 argocd/
-  applications/           Argo CD application for each service
-  projects/               Argo CD project (allowed repositories and namespaces)
+  applications/         One Argo CD application per service
+  projects/             Argo CD project (allowed repositories)
 src/
-  app/chart/              Helm chart for the app
-  ui/                     UI service: source, Dockerfile and Helm chart
-  catalog/                Catalog service
-  cart/                   Cart service
-  checkout/               Checkout service
-  orders/                 Orders service
+  app/chart/            Helm chart for the app
+  ui/ catalog/ cart/ checkout/ orders/    Services: source, Dockerfile, Helm chart
 terraform/
-  main.tf                 VPC and EKS cluster with a managed node group
-  addons.tf               ingress-nginx and cert-manager
-  argocd.tf               Argo CD installation and applications
-  security.tf             Security groups and rules
-  variables.tf, locals.tf, outputs.tf, versions.tf
-.gitattributes, .gitignore
+  main.tf               VPC and EKS cluster with a managed node group
+  addons.tf             ingress-nginx and cert-manager
+  argocd.tf             Argo CD installation and applications
 ```
 
-## Infrastructure (Terraform)
+## Getting started
 
-Terraform creates the network, the cluster, the add-ons and Argo CD in three phases, because
-the Kubernetes and Helm providers need the cluster to exist first.
+**1. Configure AWS credentials**
+
+```bash
+aws configure
+aws sts get-caller-identity
+```
+
+Use the same credentials for Terraform and kubectl, because the identity that creates the
+cluster gets admin access.
+
+**2. Create the infrastructure in three phases**
+
+The Kubernetes and Helm providers need the cluster first, so apply in stages.
 
 ```bash
 cd terraform
 terraform init
-terraform apply -target=module.vpc               # phase 1: network
-terraform apply -target=module.retail_app_eks    # phase 2: EKS cluster and nodes
-terraform apply                                  # phase 3: add-ons, Argo CD, apps
-
-aws eks update-kubeconfig --region ap-south-1 --name <cluster_name>
-kubectl get nodes
+terraform apply -target=module.vpc                # network
+terraform apply -target=module.retail_app_eks     # cluster and nodes
+terraform apply                                   # add-ons, Argo CD and apps
 ```
 
-## CI pipeline (GitHub Actions)
+**3. Connect kubectl and open the shop**
 
-On every push to `main` that changes `src/<service>/`, the **Deploy** workflow:
+```bash
+aws eks update-kubeconfig --region ap-south-1 --name <cluster_name>
+kubectl get svc -n ingress-nginx ingress-nginx-controller
+```
 
-1. Detects which services changed and builds only those.
-2. Builds each Docker image and pushes it to ECR as `demo-project-<service>:<short-sha>`.
-3. Writes the new `image.repository` and `image.tag` into that service's `chart/values.yaml`.
-4. Commits the change to `main` with a `[skip ci]` message so it does not trigger itself.
+Open the load balancer hostname over `http://`.
 
-Required repository secrets: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ACCOUNT_ID`.
-The workflow needs read and write permissions under Settings, Actions, General.
+## CI/CD pipeline
 
-## Continuous delivery (Argo CD)
+The **Deploy** workflow runs on every push to `main` that changes a file under `src/`.
 
-Argo CD watches the `main` branch of this repository. When the pipeline commits a new image tag,
-Argo CD detects the change, syncs the Helm chart, and rolls out the new pods. Each of the five
-services is its own Argo CD application, and all of them belong to the `retail-store` project.
+1. **Detect changes.** It finds which services changed and builds only those.
+2. **Build and push.** Each image goes to ECR as `demo-project-<service>:<short-sha>`.
+3. **Update the chart.** The new repository and tag are written to `values.yaml`.
+4. **Commit.** The change is committed to `main` with `[skip ci]` to avoid a loop.
+
+Repository secrets used by the pipeline:
+
+| Secret | Purpose |
+|---|---|
+| `AWS_ACCESS_KEY_ID` | Access key of the IAM user that pushes to ECR |
+| `AWS_SECRET_ACCESS_KEY` | Secret key of that user |
+| `AWS_ACCOUNT_ID` | Account ID used to build the ECR address |
+
+Set Settings, Actions, General, Workflow permissions to **Read and write** so the workflow
+can commit the new image tag.
+
+## GitOps with Argo CD
+
+Argo CD watches the `main` branch of this repository. When the pipeline commits a new
+image tag, Argo CD syncs the Helm chart and rolls out the new pods. The five services are
+separate Argo CD applications in the `retail-store` project, and this repository must be
+listed in that project's `sourceRepos`.
 
 ```bash
 kubectl get applications -n argocd
-kubectl port-forward svc/argocd-server -n argocd 8080:443     # https://localhost:8080
+kubectl port-forward svc/argocd-server -n argocd 8080:443      # https://localhost:8080
 ```
 
-## Monitoring (Prometheus and Grafana)
+## Monitoring
 
 Prometheus and Grafana are installed with the `kube-prometheus-stack` Helm chart.
 
 ```bash
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
 helm install monitoring prometheus-community/kube-prometheus-stack -n monitoring --create-namespace
-
-kubectl port-forward svc/monitoring-grafana -n monitoring 3000:80     # http://localhost:3000
-kubectl port-forward svc/monitoring-kube-prometheus-prometheus -n monitoring 9090:9090
+kubectl port-forward svc/monitoring-grafana -n monitoring 3000:80      # http://localhost:3000
 ```
 
-A custom "Number Board" dashboard shows the health of the app at a glance: nodes ready, pods
-running, restarts, CPU and memory use, network traffic, and how much of the cluster's pod
-capacity is used.
+A custom dashboard shows nodes, pods, restarts, CPU, memory and network traffic.
 
-## See it running
+## Troubleshooting
 
-```bash
-kubectl get pods -n retail-store
-kubectl get svc -n ingress-nginx ingress-nginx-controller
-```
-
-Open the load balancer hostname over `http://` to see the store.
-
-## Troubleshooting and lessons learned
-
-| Problem | Cause | Fix |
-|---|---|---|
-| `Invalid target "module"` in PowerShell | PowerShell splits `-target=module.vpc` at the dot | Quote the argument: `terraform apply "-target=module.vpc"` |
-| `You must be logged in to the server` | Only the identity that created the cluster has admin access | Run kubectl with the same credentials, or add an EKS access entry for the other identity |
-| Pods stuck in `Pending` after adding monitoring | Small nodes hit their per-node pod limit | Add nodes to the managed node group |
-| Docker build fails on `./mvnw` | `mvnw` committed from Windows lacks the executable bit and has CRLF line endings | `RUN sed -i 's/\r$//' mvnw && chmod +x mvnw` in the Dockerfile |
-| Push rejected, files over 100 MB | The `.terraform` folder was committed | Add `**/.terraform/` to `.gitignore` and remove it from git |
-| Argo CD: repo "is not permitted in project" | The project's `sourceRepos` list only allowed the original repository | Add this repository to `sourceRepos` and to each application's `repoURL` |
-| Workflow failed on `git push origin gitops` | The original workflow pushed to a `gitops` branch | Push to the branch that triggered the run (`main`) |
-| 503 from nginx after a deploy | The new pod could not be scheduled | Check `kubectl describe pod`, then add capacity or fix the page |
+| Problem | Fix |
+|---|---|
+| `Invalid target "module"` in PowerShell | Quote it: `terraform apply "-target=module.vpc"` |
+| `You must be logged in to the server` | Use the identity that created the cluster, or add an EKS access entry |
+| Pods stay `Pending` | The nodes are full, so add nodes to the managed node group |
+| Docker build fails on `./mvnw` | Run `sed -i 's/\r$//' mvnw && chmod +x mvnw` in the Dockerfile |
 
 ## Clean up
 
-The cluster, NAT gateway, nodes and load balancer cost money every hour. When you are done:
+The cluster, NAT gateway, nodes and load balancer cost money every hour.
 
 ```bash
 kubectl delete ingress -A --all
 cd terraform
 terraform destroy
 ```
-
-Then delete the ECR repositories you no longer need, check EC2 for leftover volumes and load
-balancers, and deactivate the IAM access keys used by the pipeline.
 
 ## Credits
 
