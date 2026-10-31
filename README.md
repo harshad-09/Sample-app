@@ -1,4 +1,4 @@
-# shop
+# Secret Shop: a retail store on AWS EKS with GitOps
 
 A cloud-native retail store on AWS EKS with a fully automated delivery pipeline.
 Push to `main` and it is built, published, deployed and monitored automatically.
