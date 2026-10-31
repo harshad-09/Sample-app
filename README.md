@@ -3,7 +3,7 @@
 A cloud-native retail store on AWS EKS with a fully automated delivery pipeline.
 Push to `main` and it is built, published, deployed and monitored automatically.
 
-![shop live on AWS](docs/app-live.png)
+![shop live on AWS](docs/app.png)
 
 ## Overview
 
