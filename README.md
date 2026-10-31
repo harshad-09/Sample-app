@@ -5,7 +5,7 @@ Terraform builds the infrastructure, GitHub Actions builds and publishes the ima
 deploys them to the cluster, and Prometheus and Grafana monitor everything.
 A commit to `main` goes live with no manual steps.
 
-![Secret Shop live on AWS](docs/images/app.png)
+![Secret Shop live on AWS](docs/app.png)
 
 ## What this project demonstrates
 
@@ -19,7 +19,7 @@ A commit to `main` goes live with no manual steps.
 
 ## Architecture
 
-![Architecture](docs/images/architecture.png)
+![Architecture](docs/architecture.png)
 
 ```mermaid
 flowchart LR
